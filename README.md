@@ -1,3 +1,21 @@
+# Tyler's Notes
+ * zsh
+ * zsh manager
+   * nvm
+ * brew
+   * git
+   * iterm2
+ * JetBrains
+ * Chrome
+ * Slack
+ * Gimp
+ * Harvest
+ * Microsoft Remote Desktop Client
+ * Sonos
+ * AWS Workspaces Client
+ 
+   
+
 # holman does dotfiles
 
 Your dotfiles are how you personalize your system. These are mine.
