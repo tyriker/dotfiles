@@ -5,12 +5,13 @@
  * brew
    * git
    * iterm2
+   * brew cask install docker
  * JetBrains
  * Chrome
- * Slack
+ * Slack (apple store)
  * Gimp
  * Harvest
- * Microsoft Remote Desktop Client
+ * Microsoft Remote Desktop Client (apple store)
  * Sonos
  * AWS Workspaces Client
  
