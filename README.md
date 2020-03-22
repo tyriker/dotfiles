@@ -6,6 +6,7 @@
    * git
    * iterm2
    * brew cask install docker
+   * brew cask install firefox
  * JetBrains
  * Chrome
  * Slack (apple store)
