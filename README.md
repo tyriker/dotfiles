@@ -8,6 +8,8 @@
    * brew cask install docker
    * brew cask install firefox
    * brew install p7zip
+   * brew cask install steam
+   * brew cask install godot
  * JetBrains
  * Chrome
  * Slack (apple store)
