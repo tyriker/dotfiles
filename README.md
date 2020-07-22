@@ -6,7 +6,7 @@
    * git
    * iterm2
    * brew cask install docker
-   * brew cask install firefox
+   * brew cask install homebrew/cask-versions/firefox-developer-edition
    * brew install p7zip
    * brew cask install steam
    * brew cask install godot
