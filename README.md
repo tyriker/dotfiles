@@ -10,6 +10,7 @@
    * brew install p7zip
    * brew cask install steam
    * brew cask install godot
+   * brew cask install figma
  * JetBrains
  * Chrome
  * Slack (apple store)
