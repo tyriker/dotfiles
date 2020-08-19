@@ -14,9 +14,9 @@
    * brew cask install steam
    * brew cask install godot
    * brew cask install figma
+   * brew cask install gimp
  * JetBrains
  * Chrome
- * Gimp
  * Harvest
  * Microsoft Remote Desktop Client (apple store)
  * Sonos
