@@ -5,6 +5,7 @@
  * brew
    * git
    * iterm2
+   * brew cask install slack
    * brew cask install docker
    * brew cask install homebrew/cask-versions/firefox-developer-edition
    * brew install p7zip
@@ -13,7 +14,6 @@
    * brew cask install figma
  * JetBrains
  * Chrome
- * Slack (apple store)
  * Gimp
  * Harvest
  * Microsoft Remote Desktop Client (apple store)
