@@ -3,9 +3,11 @@
  * zsh manager
    * nvm
  * brew
-   * git
-   * iterm2
+   * brew install git
+   * brew cask install iterm2
    * brew cask install slack
+   * brew cask install fantastical
+   * brew cask install piskel
    * brew cask install docker
    * brew cask install homebrew/cask-versions/firefox-developer-edition
    * brew install p7zip
