@@ -17,6 +17,7 @@
    * brew cask install gimp
  * JetBrains
  * Chrome
+ * Google Drive File Stream
  * Harvest
  * Microsoft Remote Desktop Client (apple store)
  * Sonos
