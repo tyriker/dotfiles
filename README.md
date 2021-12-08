@@ -16,6 +16,7 @@
    * brew install --cask godot
    * brew install --cask figma
    * brew install --cask gimp
+   * brew install nosql-workbench (AWS DynamoDB editor)
  * JetBrains
  * Chrome
  * Google Drive File Stream
