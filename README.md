@@ -9,7 +9,7 @@
    * brew install --cask microsoft-teams
    * brew install --cask fantastical
    * brew install --cask piskel
-   * brew install --cask docker
+   * brew install docker
    * brew install --cask homebrew/cask-versions/firefox-developer-edition
    * brew install p7zip
    * brew install --cask steam
