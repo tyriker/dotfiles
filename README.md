@@ -4,20 +4,20 @@
    * nvm
  * brew
    * brew install git
-   * brew install --cask iterm2
-   * brew install --cask slack
-   * brew install --cask microsoft-teams
-   * brew install --cask fantastical
-   * brew install --cask piskel
+   * brew install iterm2
+   * brew install slack
+   * brew install microsoft-teams
+   * brew install fantastical
+   * brew install piskel
    * brew install docker
-   * brew install --cask homebrew/cask-versions/firefox-developer-edition
+   * brew install homebrew/cask-versions/firefox-developer-edition
    * brew install p7zip
-   * brew install --cask steam
-   * brew install --cask godot
-   * brew install --cask figma
-   * brew install --cask gimp
+   * brew install steam
+   * brew install godot
+   * brew install figma
+   * brew install gimp
    * brew install nosql-workbench (AWS DynamoDB editor)
-   * brew install spotify
+   * brew install pandora
  * JetBrains
  * Chrome
  * Google Drive File Stream
