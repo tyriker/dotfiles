@@ -1,4 +1,5 @@
 # Sets reasonable macOS defaults.
+# https://macos-defaults.com/
 #
 # Or, in other words, set shit how I like in macOS.
 #
@@ -29,6 +30,14 @@ defaults write com.apple.finder ShowRemovableMediaOnDesktop -bool true
 # Run the screensaver if we're in the bottom-left hot corner.
 defaults write com.apple.dock wvous-bl-corner -int 5
 defaults write com.apple.dock wvous-bl-modifier -int 0
+
+# Configure Dock
+defaults write com.apple.dock autohide -bool true
+defaults write com.apple.dock autohide-delay -float 0
+defaults write com.apple.dock expose-animation-duration -float 0.12
+defaults write com.apple.dock showhidden -bool YES
+defaults write com.apple.dock orientation -string left
+defaults write com.apple.dock tilesize -float 128
 
 # Hide Safari's bookmark bar.
 defaults write com.apple.Safari ShowFavoritesBar -bool false
