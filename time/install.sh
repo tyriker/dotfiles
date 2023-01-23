@@ -1,2 +1,2 @@
-brew install --cask fantasitcal
+brew install --cask fantastical
 
