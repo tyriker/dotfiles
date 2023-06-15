@@ -4,11 +4,23 @@
 [hub]
         protocol = https
 [alias]
-        co = checkout
-        promote = !$ZSH/bin/git-promote
-        wtf     = !$ZSH/bin/git-wtf
-        rank-contributors = !$ZSH/bin/git-rank-contributors
-        count   = !git shortlog -sn
+	b = branch
+	bd = branch -d
+	c = commit -m
+	ca = commit -am
+	cb = checkout -b
+	cd = checkout develop
+	co = checkout
+	f = fetch
+	fa = fetch --all --prune
+	l = pull --prune
+	log = log --graph --pretty=format:'%Cred%h%Creset %an: %s - %Creset %C(yellow)%d%Creset %Cgreen(%cr)%Creset' --abbrev-commit --date=relative
+	loga = log --oneline --graph --decorate --all
+	m = merge
+	p = push origin HEAD
+	rb = rebase
+	s = status -sb
+	st = status -sb
 [color]
         diff = auto
         status = auto
