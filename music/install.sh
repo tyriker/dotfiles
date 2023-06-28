@@ -1,2 +1,2 @@
-brew install --cask pandora
+brew install --cask notunes
 
