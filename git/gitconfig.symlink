@@ -29,6 +29,7 @@
 [core]
         excludesfile = ~/.gitignore
         editor = ${EDITOR}
+	autocrlf = input
 [apply]
         whitespace = nowarn
 [mergetool]
