@@ -29,7 +29,9 @@ setopt HIST_REDUCE_BLANKS
 
 # don't expand aliases _before_ completion has finished
 #   like: git comm-[tab]
-setopt complete_aliases
+#setopt complete_aliases
+# commented the above out because it broke git alias auto-completion, for example -- gco [tab]
+# I'm not sure why or what value that setopt ever had... https://unix.stackexchange.com/a/250489
 
 bindkey '^[^[[D' backward-word
 bindkey '^[^[[C' forward-word
