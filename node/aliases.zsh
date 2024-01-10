@@ -1,3 +1,3 @@
-alias node='docker run --rm -ti -v ~/.npm:/home/node/.npm -v $(pwd):/home/node/app node:slim node'
-alias npm='docker run --rm -ti -v ~/.npm:/home/node/.npm -v $(pwd):/home/node/app node:slim npm'
+alias node='docker run --rm -ti -v ~/.npm:/home/node/.npm -v $(pwd):/home/node/app --workdir="/home/node/app" node:slim node'
+alias npm='docker run --rm -ti -v ~/.npm:/home/node/.npm -v $(pwd):/home/node/app --workdir="/home/node/app" node:slim npm'
 
