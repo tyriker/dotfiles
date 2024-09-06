@@ -12,8 +12,11 @@
 	cd = checkout develop
 	co = checkout
 # Remove `+` and `-` from diff lines; just use color.
-# The `\` needs doubled because git parses them out `\\`
-	d = !git diff --color | sed "s/^\\([^-+ ]*\\)[-+ ]/\\\\1/" | less -r
+# Notes: the " is escaped here -> \"
+# Notes: the \ is escaped here -> \\
+# oh FFS
+	d = !git diff --color | sed \"s/^\\([^-+ ]*\\)[-+ ]/\\1/\" | less -r
+	df = !_git-diff-files-only-with-color
 	f = fetch
 	fa = fetch --all --prune
 	l = pull --prune

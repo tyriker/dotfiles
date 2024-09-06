@@ -1,0 +1,8 @@
+_git-diff-files-only-with-color () {
+	yellow =printf "\033[33m"
+	green  =printf "\033[32m"
+	red    =printf "\033[31m"
+	white  =printf "\033[0m"
+
+	git diff --name-status | sed "s/^M/{$yellow}M/; s/^A/{$green}A/; s/^D/{$red}D/; s/$/{$white}/"
+}
