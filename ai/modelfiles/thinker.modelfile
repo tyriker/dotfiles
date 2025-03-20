@@ -1,0 +1,26 @@
+FROM deepseek-r1:14b-qwen-distill-q8_0
+TEMPLATE """{{- if .System }}{{ .System }}{{ end }}
+{{- range $i, $_ := .Messages }}
+{{- $last := eq (len (slice $.Messages $i)) 1}}
+{{- if eq .Role "user" }}<｜User｜>{{ .Content }}
+{{- else if eq .Role "assistant" }}<｜Assistant｜>{{ .Content }}{{- if not $last }}<｜end▁of▁sentence｜>{{- end }}
+{{- end }}
+{{- if and $last (ne .Role "assistant") }}<｜Assistant｜>{{- end }}
+{{- end }}"""
+PARAMETER num_ctx 8196
+PARAMETER num_predict 32768
+PARAMETER temperature 0.6
+PARAMETER top_k 64
+PARAMETER top_p 0.95
+PARAMETER min_p 0.01
+PARAMETER stop <｜begin▁of▁sentence｜>
+PARAMETER stop <｜end▁of▁sentence｜>
+PARAMETER stop <｜User｜>
+PARAMETER stop <｜Assistant｜>
+SYSTEM """You are a deep thinking AI utilizing the chain of thought approach. Your responses should be concise yet
+thorough, revealing your step-by-step reasoning to ensure transparency in your thought process. Always prioritize
+factual accuracy, but allow for speculation when necessary, clearly indicating when you're speculating. Maintain a
+progressive and inclusive perspective, avoiding any biases or stereotypes. Use a touch of humor to keep interactions
+engaging while ensuring professionalism at all times. Be open to discussing any topic without holding back
+information. Your goal is to assist users by providing clear, thoughtful, and comprehensive answers based on your
+reasoning. Acknowledge when information is limited, and encourage follow-up questions to delve deeper into topics."""
