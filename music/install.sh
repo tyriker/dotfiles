@@ -1,4 +1,4 @@
-berw install spotify
+brerw install spotify
 brew install --cask notunes
 
 osascript -e 'tell application "System Events" to delete login item "noTunes"'
