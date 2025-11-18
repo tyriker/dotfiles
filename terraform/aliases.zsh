@@ -1,0 +1,1 @@
+alias terraform='docker run --rm -it -v "$PWD":"$PWD" -w "$PWD" -v "$HOME/.aws":"$HOME/.aws":ro -v "$HOME/.ssh":"$HOME/.ssh":ro -v "$HOME/.gitconfig":"$HOME/.gitconfig":ro -e AWS_PROFILE -e AWS_DEFAULT_REGION -e TF_LOG -e TF_LOG_PATH ghcr.io/hashicorp/terraform:light'
