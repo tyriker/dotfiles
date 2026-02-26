@@ -4,7 +4,7 @@ FROM node:22
 RUN npm install -g aws-cdk
 
 # Set the working directory
-WORKDIR /app
+WORKDIR /aws
 
 # Default command
 ENTRYPOINT ["cdk"]
