@@ -1,3 +1,5 @@
+echo "Installing games"
+
 #brew install --cask nvidia-geforce-now
 brew install --cask steam
-brew install --cask epic-games
+#brew install --cask epic-games
