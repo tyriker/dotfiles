@@ -1,12 +1,9 @@
 echo "Installing AI tools..."
-#brew install ollama
-#brew services restart ollama
 
+npm install -g @google/gemini-cli
 
-brew install gemini-cli
 echo "Uninstalling AI tools..."
 
-brew services stop ollama
-brew uninstall ollama
+brew uninstall gemini-cli
 
 brew autoremove
