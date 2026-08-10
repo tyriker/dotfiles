@@ -1,0 +1,319 @@
+#!/usr/bin/env bash
+# Manage a single MLX model server with named model profiles.
+set -euo pipefail
+
+DEFAULT_PROFILE="${KEN_DEFAULT_PROFILE:-gemma}"
+PORT="${MLX_PORT:-8080}"
+HOST="${MLX_HOST:-127.0.0.1}"
+READY_TIMEOUT="${KEN_READY_TIMEOUT:-120}"
+
+STATE_DIR="${HOME}/.local/share/ken"
+PID_FILE="${STATE_DIR}/server.pid"
+PROFILE_FILE="${STATE_DIR}/server.profile"
+MODEL_FILE="${STATE_DIR}/server.model"
+LOG_FILE="${STATE_DIR}/server.log"
+
+mkdir -p "$STATE_DIR"
+
+usage() {
+  cat <<EOF
+Usage: ken [COMMAND]
+
+Commands:
+  --on [PROFILE] [ARGS...]  Start a profile, switching models if necessary
+  --off                     Stop the server
+  --status                  Show server, profile, model, and API status
+  --models                  List available model profiles
+  --log                     Tail server logs
+
+Aliases: start, stop, status, models, list, logs
+Default profile: $DEFAULT_PROFILE
+EOF
+}
+
+list_profiles() {
+  cat <<'EOF'
+Available model profiles:
+  gemma               General-purpose Gemma 4 26B-A4B (default)
+  gemma-nothink       Gemma 4 26B-A4B with thinking disabled
+  unfiltered          Jiunsong uncensored Gemma 4 26B
+  unfiltered-nothink  Uncensored Gemma 4 26B with thinking disabled
+EOF
+}
+
+load_profile() {
+  local profile="$1"
+  local profile_model profile_temp profile_top_p profile_top_k profile_min_p profile_max_tokens
+  local profile_chat_template_args=""
+
+  case "$profile" in
+    gemma)
+      profile_model="unsloth/gemma-4-26b-a4b-it-UD-MLX-4bit"
+      profile_temp="0.3"
+      profile_top_p="0.95"
+      profile_top_k="0"
+      profile_min_p="0.0"
+      profile_max_tokens="4096"
+      ;;
+    gemma-nothink)
+      profile_model="unsloth/gemma-4-26b-a4b-it-UD-MLX-4bit"
+      profile_temp="0.3"
+      profile_top_p="0.95"
+      profile_top_k="0"
+      profile_min_p="0.0"
+      profile_max_tokens="4096"
+      profile_chat_template_args='{"enable_thinking":false}'
+      ;;
+    unfiltered|unfiltered-nothink)
+      profile_model="Jiunsong/supergemma4-26b-uncensored-mlx-4bit-v2"
+      profile_temp="0.5"
+      profile_top_p="0.95"
+      profile_top_k="0"
+      profile_min_p="0.0"
+      profile_max_tokens="4096"
+      if [ "$profile" = "unfiltered-nothink" ]; then
+        profile_chat_template_args='{"enable_thinking":false}'
+      fi
+      ;;
+    *)
+      echo "ERROR: Unknown profile: $profile" >&2
+      echo "Run 'ken --models' to list available profiles." >&2
+      return 1
+      ;;
+  esac
+
+  PROFILE="$profile"
+  MODEL="${MLX_MODEL:-$profile_model}"
+  TEMP="${MLX_TEMP:-$profile_temp}"
+  TOP_P="${MLX_TOP_P:-$profile_top_p}"
+  TOP_K="${MLX_TOP_K:-$profile_top_k}"
+  MIN_P="${MLX_MIN_P:-$profile_min_p}"
+  MAX_TOKENS="${MLX_MAX_TOKENS:-$profile_max_tokens}"
+  CHAT_TEMPLATE_ARGS="${MLX_CHAT_TEMPLATE_ARGS:-$profile_chat_template_args}"
+}
+
+status() {
+  if [ -f "$PID_FILE" ]; then
+    local pid
+    pid=$(cat "$PID_FILE")
+    if [[ "$pid" =~ ^[0-9]+$ ]] && kill -0 "$pid" 2>/dev/null; then
+      return 0
+    fi
+  fi
+  return 1
+}
+
+get_pid() {
+  if status; then
+    cat "$PID_FILE"
+  fi
+}
+
+get_active_profile() {
+  if [ -f "$PROFILE_FILE" ]; then
+    cat "$PROFILE_FILE"
+  else
+    echo "unknown"
+  fi
+}
+
+get_active_model() {
+  if [ -f "$MODEL_FILE" ]; then
+    cat "$MODEL_FILE"
+  else
+    echo "unknown"
+  fi
+}
+
+api_ready() {
+  curl --silent --fail --max-time 2 "http://${HOST}:${PORT}/v1/models" >/dev/null 2>&1
+}
+
+stop_server() {
+  if ! status; then
+    rm -f "$PID_FILE" "$PROFILE_FILE" "$MODEL_FILE"
+    echo "Ken server is not running."
+    return 0
+  fi
+
+  local pid
+  pid=$(get_pid)
+  echo "Stopping Ken server (PID: $pid)..."
+  kill "$pid" 2>/dev/null || true
+
+  local i
+  for i in {1..10}; do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      break
+    fi
+    sleep 0.5
+  done
+
+  if kill -0 "$pid" 2>/dev/null; then
+    echo "Force stopping server..."
+    kill -9 "$pid" 2>/dev/null || true
+  fi
+
+  rm -f "$PID_FILE" "$PROFILE_FILE" "$MODEL_FILE"
+  echo "Ken server stopped successfully."
+}
+
+start_server() {
+  local requested_profile="$1"
+  shift
+  load_profile "$requested_profile"
+
+  if status; then
+    local active_profile active_model pid
+    active_profile=$(get_active_profile)
+    active_model=$(get_active_model)
+    pid=$(get_pid)
+
+    if [ "$active_profile" = "$PROFILE" ] && [ "$active_model" = "$MODEL" ]; then
+      echo "Ken profile '$PROFILE' is already running with PID $pid."
+      echo "Model: $active_model"
+      echo "Endpoint: http://${HOST}:${PORT}/v1"
+      return 0
+    fi
+
+    echo "Switching Ken from profile '$active_profile' to '$PROFILE'..."
+    stop_server
+  fi
+
+  echo "Starting Ken profile: $PROFILE"
+  echo "Model: $MODEL"
+  echo "Sampling: temp=$TEMP, top_p=$TOP_P, top_k=$TOP_K, min_p=$MIN_P"
+  echo "Max output tokens: $MAX_TOKENS"
+  echo "Logging to: $LOG_FILE"
+
+  local -a chat_template_options=()
+  if [ -n "$CHAT_TEMPLATE_ARGS" ]; then
+    chat_template_options=(--chat-template-args "$CHAT_TEMPLATE_ARGS")
+  fi
+
+  nohup mlx_lm.server \
+    --model "$MODEL" \
+    --host "$HOST" \
+    --port "$PORT" \
+    --temp "$TEMP" \
+    --top-p "$TOP_P" \
+    --top-k "$TOP_K" \
+    --min-p "$MIN_P" \
+    --max-tokens "$MAX_TOKENS" \
+    "${chat_template_options[@]}" \
+    "$@" >"$LOG_FILE" 2>&1 &
+
+  local pid=$!
+  echo "$pid" >"$PID_FILE"
+  echo "$PROFILE" >"$PROFILE_FILE"
+  echo "$MODEL" >"$MODEL_FILE"
+
+  sleep 1.5
+  if ! kill -0 "$pid" 2>/dev/null; then
+    echo "ERROR: Server failed to start. Last 10 lines of log:"
+    tail -n 10 "$LOG_FILE" || true
+    rm -f "$PID_FILE" "$PROFILE_FILE" "$MODEL_FILE"
+    return 1
+  fi
+
+  echo "Server process started with PID $pid. Waiting for the API..."
+  local elapsed=0
+  while (( elapsed < READY_TIMEOUT )); do
+    if api_ready; then
+      echo "Ken server is ready."
+      echo "Endpoint: http://${HOST}:${PORT}/v1"
+      echo "Use 'ken --off' to stop the server."
+      return 0
+    fi
+
+    if ! kill -0 "$pid" 2>/dev/null; then
+      echo "ERROR: Server exited while loading. Last 10 lines of log:"
+      tail -n 10 "$LOG_FILE" || true
+      rm -f "$PID_FILE" "$PROFILE_FILE" "$MODEL_FILE"
+      return 1
+    fi
+
+    sleep 2
+    ((elapsed += 2))
+  done
+
+  echo "Server is still loading after ${READY_TIMEOUT}s."
+  echo "It remains running; use 'ken --log' to follow startup progress."
+  echo "Endpoint: http://${HOST}:${PORT}/v1"
+}
+
+show_status() {
+  if ! status; then
+    echo "Ken server is STOPPED."
+    return 1
+  fi
+
+  local pid profile model api_state
+  pid=$(get_pid)
+  profile=$(get_active_profile)
+  model=$(get_active_model)
+  if api_ready; then
+    api_state="ready"
+  else
+    api_state="loading or unavailable"
+  fi
+
+  cat <<EOF
+Ken server is RUNNING
+Profile:  $profile
+Model:    $model
+PID:      $pid
+Endpoint: http://${HOST}:${PORT}/v1
+API:      $api_state
+EOF
+}
+
+if [[ $# -eq 0 ]]; then
+  if status; then
+    show_status
+    echo
+    echo "Commands: ken --on PROFILE | ken --off | ken --models | ken --log"
+  else
+    echo "Ken server is STOPPED."
+    echo
+    echo "Start the default profile: ken --on"
+    echo "Choose a model profile:  ken --models"
+  fi
+  exit 0
+fi
+
+case "$1" in
+  --on|start)
+    shift
+    profile="$DEFAULT_PROFILE"
+    if [[ $# -gt 0 && "$1" != -* ]]; then
+      profile="$1"
+      shift
+    fi
+    start_server "$profile" "$@"
+    ;;
+  --off|stop)
+    stop_server
+    ;;
+  --log|logs)
+    if [ -f "$LOG_FILE" ]; then
+      tail -f "$LOG_FILE"
+    else
+      echo "No log file found."
+    fi
+    ;;
+  --status|status)
+    show_status
+    ;;
+  --models|models|list)
+    list_profiles
+    ;;
+  --help|-h|help)
+    usage
+    ;;
+  *)
+    echo "ERROR: Unknown command: $1" >&2
+    usage >&2
+    exit 1
+    ;;
+esac
