@@ -1,5 +1,7 @@
 brew install --cask pocket-casts
-brew install --cask notunes
 
-osascript -e 'tell application "System Events" to delete login item "noTunes"'
-osascript -e 'tell application "System Events" to make login item at end with properties {name: "noTunes", path:"/Applications/noTunes.app", hidden:false}'
+if brew list --cask notunes >/dev/null 2>&1; then
+  brew uninstall --cask notunes
+fi
+
+osascript -e 'tell application "System Events" to if exists login item "noTunes" then delete login item "noTunes"'

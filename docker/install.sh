@@ -13,4 +13,6 @@ then
 
 fi
 
+brew install docker-buildx
+
 exit 0
